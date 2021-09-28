@@ -1,0 +1,9 @@
+
+
+*.o
+*.obj
+*.lst
+*~
+my-program
+gdb-commands.txt
+
