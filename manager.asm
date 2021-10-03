@@ -75,7 +75,7 @@ manager:
 	call libPuhfessorP_inputSignedInteger64
 	mov [USERS_INPUT], rax							; user input - > rax -> USERS_INPUT
 	
-	mov r15, USERS_INPUT
+	mov r15, USERS_INPUT							; stopped here. I need to figure out how to check if the USER_INPUT is an integer. Probably need to use one of the puhfessor functions
 	
 	
 	mov rax, SYS_WRITE
