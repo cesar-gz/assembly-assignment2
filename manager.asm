@@ -64,7 +64,8 @@ manager:
 	mov r12, rsp		; have the stack pointer point to the first integer
 	
 	;;;;;;; Filling in the Array;;;;;;;
-	
+array_builder:
+
 	mov rax, SYS_WRITE
 	mov rdi, FD_STDOUT
 	mov rsi, SEC_MESSAGE							; asking for input message
@@ -73,10 +74,11 @@ manager:
 	call crlf
 	
 	call libPuhfessorP_inputSignedInteger64
-	mov [USERS_INPUT], rax							; user input - > rax -> USERS_INPUT
+	mov [USERS_INPUT], rax							; their actual input - > rax -> USERS_INPUT
 	
-	mov r15, USERS_INPUT							; stopped here. I need to figure out how to check if the USER_INPUT is an integer. Probably need to use one of the puhfessor functions
-	
+	mov r15, 9223372036854775808
+	cmp [USERS_INPUT], r15						; if their input is not a number the array is finished
+	je invalidInput
 	
 	mov rax, SYS_WRITE
 	mov rdi, FD_STDOUT
@@ -84,9 +86,29 @@ manager:
 	mov rdx, THR_MESSAGE_LEN
 	syscall
 	mov rdi, [USERS_INPUT]
-	call libPuhfessorP_printSignedInteger64
+	call libPuhfessorP_printSignedInteger64 	;the users input has been printed, "You've entered : " message
 	call crlf
 	
+	mov r14, 0													; have the offset/index at 0
+	cmp r14, LOCAL_VAR_COUNT			; 0 (our array index) compared to our size of the array : LOCAL_VAR_COUNT
+	jge array_finished
+	
+	mov r13, [USERS_INPUT]
+	mov [r12 + (r14 * 8)], r13	; array[r14 ( our pointer)] = r13
+	inc r14
+	jmp array_builder
+
+invalidInput:
+	mov rax, SYS_WRITE
+	mov rdi, FD_STDOUT
+	mov rsi, FOU_MESSAGE							; "that doesn't make sense" message based on the users invalid input
+	mov rdx, FOU_MESSAGE_LEN
+	syscall
+	call crlf
+
+array_finished:
+	nop
+
 	;;;;;;; Clean up
 	mov rsp, rbp
 	pop r15
